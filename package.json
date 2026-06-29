@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:parse": "tsx scripts/smoke-parse.ts",
-    "transcripts:upload": "tsx scripts/upload-transcripts.ts"
+    "transcripts:upload": "tsx scripts/upload-transcripts.ts",
+    "cache:revalidate": "tsx scripts/revalidate-episodes-cache.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

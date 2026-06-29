@@ -1,7 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { loadEnvLocal } from "./load-env-local";
 import { parseSrt } from "@/lib/transcript/srt";
 import { createSecretSupabaseClient } from "@/lib/supabase/server";
+
+loadEnvLocal();
 
 function parseArgs(argv: string[]) {
   let dir = process.env.TRANSCRIPTS_DIR ?? "./transcripts";
@@ -27,17 +30,17 @@ function parseArgs(argv: string[]) {
 
 async function revalidateEpisodesCache() {
   const cronSecret = process.env.CRON_SECRET;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.VERCEL_URL;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.VERCEL_URL ??
+    "http://localhost:3000";
 
-  if (!cronSecret || !baseUrl) {
+  if (!cronSecret) {
     console.log(
       "\nReminder: episode cache may be stale until cacheLife expires.",
     );
     console.log(
-      "To revalidate immediately, set CRON_SECRET and NEXT_PUBLIC_SITE_URL (or VERCEL_URL), then re-run.",
-    );
-    console.log(
-      `Or: curl -X POST "${baseUrl ? `https://${baseUrl.replace(/^https?:\/\//, "")}` : "http://localhost:3000"}/api/revalidate/episodes" -H "Authorization: Bearer $CRON_SECRET"`,
+      "Add CRON_SECRET to .env.local, then run: pnpm cache:revalidate",
     );
     return;
   }
