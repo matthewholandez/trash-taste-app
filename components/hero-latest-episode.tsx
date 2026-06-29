@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { isAwardsEpisode } from "@/lib/awards";
 import { formatDate, formatDuration } from "@/lib/format";
 import type { Episode } from "@/lib/types";
@@ -51,7 +52,12 @@ export function HeroLatestEpisode({ episode }: HeroLatestEpisodeProps) {
               isAwards ? "text-awards-gold-light" : "text-foreground",
             ].join(" ")}
           >
-            {episode.title}
+            <Link
+              href={`/episodes/${episode.episode_number}`}
+              className="transition hover:text-brand-purple focus-visible:ring-2 focus-visible:ring-brand-purple/30 focus-visible:outline-none motion-reduce:transition-none"
+            >
+              {episode.title}
+            </Link>
           </h2>
           <p
             className={[

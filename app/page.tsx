@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { SiteHeader } from "@/components/site-header";
 import { EmptyState } from "@/components/empty-state";
+import { SiteShell } from "@/components/site-shell";
 import { EpisodeArchive } from "@/components/episode-archive";
 import { HeroLatestEpisode } from "@/components/hero-latest-episode";
 import { getEpisodes, getLatestEpisode } from "@/lib/episodes";
@@ -37,11 +37,11 @@ async function loadPageContent(): Promise<PageContent> {
 
 export default function HomePage() {
   return (
-    <PageShell>
+    <SiteShell showCommunityNotice>
       <Suspense fallback={<HomeLoading />}>
         <HomeContent />
       </Suspense>
-    </PageShell>
+    </SiteShell>
   );
 }
 
@@ -87,13 +87,3 @@ function HomeLoading() {
   );
 }
 
-function PageShell({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 bg-background px-6 py-10">
-        {children}
-      </main>
-    </>
-  );
-}

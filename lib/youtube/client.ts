@@ -1,6 +1,10 @@
 import { parseIso8601Duration } from "@/lib/format";
+import {
+  parseChaptersFromDescription,
+  summaryFromDescription,
+} from "@/lib/youtube/chapters";
 import { parseYouTubeEpisodeTitle } from "@/lib/youtube/parse";
-import type { ParsedYouTubeEpisode } from "@/lib/types";
+import type { ParsedYouTubeEpisode, ParsedYouTubeEpisodeBase } from "@/lib/types";
 
 type YouTubeThumbnail = {
   url?: string;
@@ -39,10 +43,24 @@ type ChannelsResponse = {
 type VideosResponse = {
   items?: Array<{
     id?: string;
+    snippet?: {
+      description?: string;
+      tags?: string[];
+    };
     contentDetails?: {
       duration?: string;
     };
+    statistics?: {
+      viewCount?: string;
+    };
   }>;
+};
+
+export type VideoDetails = {
+  duration: number | null;
+  description: string;
+  tags: string[];
+  viewCount: number | null;
 };
 
 const MAX_RETRIES = 3;
@@ -172,31 +190,42 @@ export async function fetchAllPlaylistItems(
   return items;
 }
 
-export async function fetchVideoDurations(
+export async function fetchVideoDetails(
   videoIds: string[],
   existingDurations: Map<string, number> = new Map(),
-): Promise<Map<string, number>> {
-  const durations = new Map(existingDurations);
-  const idsToFetch = videoIds.filter((id) => !durations.has(id));
+): Promise<Map<string, VideoDetails>> {
+  const details = new Map<string, VideoDetails>();
 
-  for (let index = 0; index < idsToFetch.length; index += 50) {
-    const batch = idsToFetch.slice(index, index + 50);
+  for (let index = 0; index < videoIds.length; index += 50) {
+    const batch = videoIds.slice(index, index + 50);
     const data = await youtubeFetch<VideosResponse>("videos", {
-      part: "contentDetails",
+      part: "snippet,contentDetails,statistics",
       id: batch.join(","),
     });
 
     for (const item of data.items ?? []) {
-      if (!item.id || !item.contentDetails?.duration) {
+      if (!item.id) {
         continue;
       }
 
-      const duration = parseIso8601Duration(item.contentDetails.duration);
-      durations.set(item.id, duration);
+      const duration = existingDurations.has(item.id)
+        ? existingDurations.get(item.id)!
+        : item.contentDetails?.duration
+          ? parseIso8601Duration(item.contentDetails.duration)
+          : null;
+
+      details.set(item.id, {
+        duration,
+        description: item.snippet?.description ?? "",
+        tags: item.snippet?.tags ?? [],
+        viewCount: item.statistics?.viewCount
+          ? Number(item.statistics.viewCount)
+          : null,
+      });
     }
   }
 
-  return durations;
+  return details;
 }
 
 export async function fetchTrashTasteEpisodesFromYouTube(
@@ -208,7 +237,7 @@ export async function fetchTrashTasteEpisodesFromYouTube(
   const uploadsPlaylistId = await getUploadsPlaylistId();
   const playlistItems = await fetchAllPlaylistItems(uploadsPlaylistId);
 
-  const parsed: ParsedYouTubeEpisode[] = [];
+  const parsed: ParsedYouTubeEpisodeBase[] = [];
   let discarded = 0;
 
   for (const item of playlistItems) {
@@ -231,16 +260,25 @@ export async function fetchTrashTasteEpisodesFromYouTube(
     parsed.push(episode);
   }
 
-  const durations = await fetchVideoDurations(
+  const details = await fetchVideoDetails(
     parsed.map((episode) => episode.youtube_id),
     existingDurations,
   );
 
   return {
-    episodes: parsed.map((episode) => ({
-      ...episode,
-      duration_seconds: durations.get(episode.youtube_id) ?? null,
-    })),
+    episodes: parsed.map((episode) => {
+      const video = details.get(episode.youtube_id);
+      const description = video?.description ?? "";
+
+      return {
+        ...episode,
+        duration_seconds: video?.duration ?? null,
+        summary: summaryFromDescription(description),
+        chapters: parseChaptersFromDescription(description),
+        tags: video?.tags ?? [],
+        view_count: video?.viewCount ?? null,
+      };
+    }),
     discarded,
   };
 }

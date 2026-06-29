@@ -27,6 +27,10 @@ transcripts/
 # misc
 .DS_Store
 *.pem
+.cursor/
+
+# transcripts
+/transcripts/
 
 # debug
 npm-debug.log*

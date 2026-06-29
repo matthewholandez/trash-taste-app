@@ -1,5 +1,18 @@
 export type TranscriptionStatus = "none" | "pending" | "complete";
 
+export type Chapter = {
+  time: string;
+  seconds: number;
+  label: string;
+  blurb?: string;
+};
+
+export type TranscriptLine = {
+  time: string;
+  seconds: number;
+  text: string;
+};
+
 export type Episode = {
   id: string;
   episode_number: number;
@@ -9,12 +22,17 @@ export type Episode = {
   thumbnail_url: string | null;
   published_at: string | null;
   duration_seconds: number | null;
+  summary: string | null;
+  tags: string[];
+  view_count: number | null;
+  chapters: Chapter[];
+  transcript: TranscriptLine[];
   transcription_status: TranscriptionStatus;
   created_at: string;
   updated_at: string;
 };
 
-export type ParsedYouTubeEpisode = {
+export type ParsedYouTubeEpisodeBase = {
   episode_number: number;
   title: string;
   youtube_id: string;
@@ -22,6 +40,13 @@ export type ParsedYouTubeEpisode = {
   thumbnail_url: string | null;
   published_at: string;
   duration_seconds: number | null;
+};
+
+export type ParsedYouTubeEpisode = ParsedYouTubeEpisodeBase & {
+  summary: string | null;
+  tags: string[];
+  view_count: number | null;
+  chapters: Chapter[];
 };
 
 export type SyncResult = {
