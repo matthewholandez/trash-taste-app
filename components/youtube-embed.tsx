@@ -3,11 +3,21 @@
 type YouTubeEmbedProps = {
   videoId: string;
   title: string;
+  variant?: "default" | "awards";
 };
 
-export function YouTubeEmbed({ videoId, title }: YouTubeEmbedProps) {
+export function YouTubeEmbed({
+  videoId,
+  title,
+  variant = "default",
+}: YouTubeEmbedProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#E8E2D6] bg-black shadow-sm">
+    <div
+      className={[
+        "overflow-hidden rounded-lg border bg-black shadow-sm",
+        variant === "awards" ? "border-awards-gold/40" : "border-border",
+      ].join(" ")}
+    >
       <iframe
         src={`https://www.youtube.com/embed/${videoId}`}
         title={title}

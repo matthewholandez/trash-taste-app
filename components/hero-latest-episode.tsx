@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { isAwardsEpisode } from "@/lib/awards";
 import { formatDate, formatDuration } from "@/lib/format";
 import type { Episode } from "@/lib/types";
 import { YouTubeEmbed } from "@/components/youtube-embed";
@@ -8,6 +9,7 @@ type HeroLatestEpisodeProps = {
 };
 
 export function HeroLatestEpisode({ episode }: HeroLatestEpisodeProps) {
+  const isAwards = isAwardsEpisode(episode.title);
   const published = formatDate(episode.published_at);
   const duration = formatDuration(episode.duration_seconds);
   const meta = [
@@ -19,19 +21,53 @@ export function HeroLatestEpisode({ episode }: HeroLatestEpisodeProps) {
     .join(" · ");
 
   return (
-    <section className="rounded-3xl border border-[#E8E2D6] bg-white p-6 shadow-sm sm:p-8">
-      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1.1fr_1fr] lg:items-start">
+    <section
+      className={[
+        "-mt-6 rounded-lg border p-6 shadow-lg sm:p-8",
+        isAwards
+          ? "border-awards-gold/40 bg-awards-black shadow-awards-gold/15"
+          : "border-border bg-background shadow-brand-purple/10",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "flex flex-col gap-8 border-l-4 pl-6 lg:grid lg:grid-cols-[1.1fr_1fr] lg:items-start lg:pl-8",
+          isAwards ? "border-awards-gold" : "border-brand-purple",
+        ].join(" ")}
+      >
         <div className="space-y-5">
-          <p className="text-sm font-medium tracking-wide text-[#1B5E3A] uppercase">
-            Latest episode
+          <p
+            className={[
+              "text-xs font-semibold tracking-[0.15em] uppercase",
+              isAwards ? "text-awards-gold-light" : "text-brand-purple",
+            ].join(" ")}
+          >
+            {isAwards ? "Latest awards episode" : "Latest episode"}
           </p>
-          <h2 className="font-display text-3xl leading-tight font-semibold text-[#1A1A1A] sm:text-4xl">
+          <h2
+            className={[
+              "font-display text-3xl leading-tight tracking-tight uppercase sm:text-4xl",
+              isAwards ? "text-awards-gold-light" : "text-foreground",
+            ].join(" ")}
+          >
             {episode.title}
           </h2>
-          <p className="text-sm text-[#666666]">{meta}</p>
+          <p
+            className={[
+              "text-sm",
+              isAwards ? "text-awards-gold-muted" : "text-muted",
+            ].join(" ")}
+          >
+            {meta}
+          </p>
 
           {episode.thumbnail_url ? (
-            <div className="overflow-hidden rounded-2xl border border-[#E8E2D6] lg:hidden">
+            <div
+              className={[
+                "overflow-hidden rounded-lg border lg:hidden",
+                isAwards ? "border-awards-gold/30" : "border-border",
+              ].join(" ")}
+            >
               <Image
                 src={episode.thumbnail_url}
                 alt={episode.title}
@@ -47,14 +83,23 @@ export function HeroLatestEpisode({ episode }: HeroLatestEpisodeProps) {
             href={episode.youtube_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex rounded-full bg-[#1B5E3A] px-5 py-2.5 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:bg-[#164A2F] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className={[
+              "inline-flex rounded-md px-5 py-2.5 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none",
+              isAwards
+                ? "bg-awards-gold text-awards-black hover:bg-awards-gold-light hover:shadow-[0_0_20px_rgba(201,162,39,0.45)] focus-visible:ring-awards-gold-light focus-visible:ring-offset-awards-black motion-reduce:hover:shadow-none"
+                : "bg-brand-purple text-foreground-on-purple hover:bg-brand-purple-dark hover:shadow-[0_0_20px_rgba(255,210,63,0.3)] focus-visible:ring-brand-purple-light focus-visible:ring-offset-background motion-reduce:hover:shadow-none",
+            ].join(" ")}
           >
             Watch on YouTube
           </a>
         </div>
 
         <div className="space-y-4">
-          <YouTubeEmbed videoId={episode.youtube_id} title={episode.title} />
+          <YouTubeEmbed
+            videoId={episode.youtube_id}
+            title={episode.title}
+            variant={isAwards ? "awards" : "default"}
+          />
         </div>
       </div>
     </section>

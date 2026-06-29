@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { DM_Sans, Outfit } from "next/font/google";
+import { Archivo_Black, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const archivoBlack = Archivo_Black({
+  variable: "--font-archivo-black",
   subsets: ["latin"],
+  weight: "400",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -25,9 +27,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${archivoBlack.variable} ${ibmPlexSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#FAF7F0] font-sans text-[#1A1A1A]">
+      <body className="min-h-full bg-background font-sans text-foreground">
         {children}
       </body>
     </html>

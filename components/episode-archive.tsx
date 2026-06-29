@@ -27,12 +27,10 @@ export function EpisodeArchive({ episodes }: EpisodeArchiveProps) {
     <section id="episodes" className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl font-semibold text-[#1A1A1A] sm:text-3xl">
+          <h2 className="font-display text-2xl tracking-tight text-foreground uppercase sm:text-3xl">
             All episodes
           </h2>
-          <p className="mt-1 text-sm text-[#666666]">
-            {episodes.length} episodes
-          </p>
+          <p className="mt-1 text-sm text-muted">{episodes.length} episodes</p>
         </div>
 
         <label className="block w-full sm:max-w-sm">
@@ -42,17 +40,15 @@ export function EpisodeArchive({ episodes }: EpisodeArchiveProps) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by title or number"
-            className="w-full rounded-full border border-[#D9D0C0] bg-white px-4 py-2.5 text-sm text-[#1A1A1A] outline-none transition focus:border-[#1B5E3A] focus:ring-2 focus:ring-[#1B5E3A]/20"
+            className="w-full rounded-md border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none transition focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/30"
           />
         </label>
       </div>
 
       {filteredEpisodes.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#D9D0C0] bg-white px-6 py-10 text-center">
-          <p className="font-medium text-[#1A1A1A]">No episodes found</p>
-          <p className="mt-2 text-sm text-[#666666]">
-            Try a different search term.
-          </p>
+        <div className="rounded-lg border border-dashed border-brand-purple/40 bg-surface px-6 py-10 text-center">
+          <p className="font-medium text-foreground">No episodes found</p>
+          <p className="mt-2 text-sm text-muted">Try a different search term.</p>
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
