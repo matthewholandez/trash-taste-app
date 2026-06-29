@@ -123,7 +123,13 @@ export function EpisodeReader({ episode }: EpisodeReaderProps) {
   );
 
   return (
-    <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-7">
+    <div className="space-y-4">
+      <p className="rounded-md border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-muted">
+        Summary, transcript and tags are auto-generated. AI output can be
+        inaccurate and should not be taken as fact.
+      </p>
+
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-7">
       <aside className="mb-7 space-y-5 lg:sticky lg:top-6 lg:mb-0 lg:self-start">
         {episode.summary ? (
           <div className="rounded-lg border border-border bg-background p-5 shadow-sm">
@@ -282,6 +288,7 @@ export function EpisodeReader({ episode }: EpisodeReaderProps) {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
