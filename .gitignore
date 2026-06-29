@@ -14,6 +14,9 @@ package-lock.json
 # testing
 /coverage
 
+# transcriptions
+/transcriptions/
+
 # next.js
 /.next/
 /out/
