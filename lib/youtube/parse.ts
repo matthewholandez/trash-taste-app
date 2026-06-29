@@ -1,4 +1,4 @@
-import type { ParsedYouTubeEpisode } from "@/lib/types";
+import type { ParsedYouTubeEpisodeBase } from "@/lib/types";
 
 const EPISODE_MARKER = "Trash Taste #";
 
@@ -7,7 +7,7 @@ export function parseYouTubeEpisodeTitle(
   videoId: string,
   publishedAt: string,
   thumbnailUrl: string | null,
-): ParsedYouTubeEpisode | null {
+): ParsedYouTubeEpisodeBase | null {
   if (!rawTitle.includes(EPISODE_MARKER)) {
     return null;
   }

@@ -41,3 +41,23 @@ export async function getLatestEpisode(): Promise<Episode | null> {
 
   return data;
 }
+
+export async function getEpisode(episodeNumber: number): Promise<Episode | null> {
+  "use cache";
+  cacheTag("episodes");
+  cacheLife("episodes");
+
+  const supabase = createPublishableSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("episodes")
+    .select("*")
+    .eq("episode_number", episodeNumber)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}

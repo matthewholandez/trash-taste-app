@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:parse": "tsx scripts/smoke-parse.ts"
+    "test:parse": "tsx scripts/smoke-parse.ts",
+    "transcripts:upload": "tsx scripts/upload-transcripts.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

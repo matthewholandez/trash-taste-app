@@ -28,7 +28,6 @@ export async function syncEpisodesFromYouTube(): Promise<SyncResult> {
   }
 
   const now = new Date().toISOString();
-  const youtubeIds = episodes.map((episode) => episode.youtube_id);
   const existingIds = new Set((existingRows ?? []).map((row) => row.youtube_id));
 
   const rows = episodes.map((episode) => ({
@@ -39,6 +38,10 @@ export async function syncEpisodesFromYouTube(): Promise<SyncResult> {
     thumbnail_url: episode.thumbnail_url,
     published_at: episode.published_at,
     duration_seconds: episode.duration_seconds,
+    summary: episode.summary,
+    tags: episode.tags,
+    view_count: episode.view_count,
+    chapters: episode.chapters,
     updated_at: now,
   }));
 
