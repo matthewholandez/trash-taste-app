@@ -28,11 +28,14 @@ curl -X POST http://localhost:3000/api/sync/episodes \
   -H "Authorization: Bearer $CRON_SECRET"
 ```
 
+The same endpoint accepts GET (used by Vercel Cron) and POST (manual sync).
+
 ## Environment variables
 
 | Variable | Purpose |
 |---|---|
 | `YOUTUBE_API_KEY` | YouTube Data API v3 key |
+| `YOUTUBE_UPLOADS_PLAYLIST_ID` | Optional. Skips the `channels.list` call when set |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (`sb_publishable_...`) for page reads |
 | `SUPABASE_SECRET_KEY` | Supabase secret key (`sb_secret_...`) for sync writes |

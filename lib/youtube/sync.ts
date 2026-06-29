@@ -4,7 +4,24 @@ import { fetchTrashTasteEpisodesFromYouTube } from "@/lib/youtube/client";
 
 export async function syncEpisodesFromYouTube(): Promise<SyncResult> {
   const supabase = createSecretSupabaseClient();
-  const { episodes, discarded } = await fetchTrashTasteEpisodesFromYouTube();
+
+  const { data: existingRows, error: existingError } = await supabase
+    .from("episodes")
+    .select("youtube_id, duration_seconds");
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  const existingDurations = new Map<string, number>();
+  for (const row of existingRows ?? []) {
+    if (row.duration_seconds != null) {
+      existingDurations.set(row.youtube_id, row.duration_seconds);
+    }
+  }
+
+  const { episodes, discarded } =
+    await fetchTrashTasteEpisodesFromYouTube(existingDurations);
 
   if (episodes.length === 0) {
     return { synced: 0, inserted: 0, updated: 0, discarded };
@@ -12,16 +29,6 @@ export async function syncEpisodesFromYouTube(): Promise<SyncResult> {
 
   const now = new Date().toISOString();
   const youtubeIds = episodes.map((episode) => episode.youtube_id);
-
-  const { data: existingRows, error: existingError } = await supabase
-    .from("episodes")
-    .select("youtube_id")
-    .in("youtube_id", youtubeIds);
-
-  if (existingError) {
-    throw new Error(existingError.message);
-  }
-
   const existingIds = new Set((existingRows ?? []).map((row) => row.youtube_id));
 
   const rows = episodes.map((episode) => ({

@@ -45,12 +45,31 @@ type VideosResponse = {
   }>;
 };
 
+const MAX_RETRIES = 3;
+const RETRY_DELAYS_MS = [1000, 2000, 4000];
+
 function getApiKey(): string {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
     throw new Error("Missing YOUTUBE_API_KEY");
   }
   return apiKey;
+}
+
+function isQuotaError(status: number, body: string): boolean {
+  if (status === 429) {
+    return true;
+  }
+
+  if (status === 403) {
+    return /quota|rateLimit/i.test(body);
+  }
+
+  return false;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function youtubeFetch<T>(path: string, params: Record<string, string>): Promise<T> {
@@ -61,16 +80,33 @@ async function youtubeFetch<T>(path: string, params: Record<string, string>): Pr
     url.searchParams.set(key, value);
   }
 
-  const response = await fetch(url.toString(), {
-    next: { revalidate: 0 },
-  });
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    const response = await fetch(url.toString(), {
+      next: { revalidate: 0 },
+    });
+
+    if (response.ok) {
+      return response.json() as Promise<T>;
+    }
+
     const body = await response.text();
+
+    if (isQuotaError(response.status, body) && attempt < MAX_RETRIES) {
+      const delay = RETRY_DELAYS_MS[attempt] ?? RETRY_DELAYS_MS.at(-1)!;
+      console.warn(
+        `YouTube API ${path} quota error (${response.status}), retry ${attempt + 1}/${MAX_RETRIES} in ${delay}ms`,
+      );
+      await sleep(delay);
+      lastError = new Error(`YouTube API error (${response.status}): ${body}`);
+      continue;
+    }
+
     throw new Error(`YouTube API error (${response.status}): ${body}`);
   }
 
-  return response.json() as Promise<T>;
+  throw lastError ?? new Error(`YouTube API error: ${path}`);
 }
 
 function pickThumbnail(snippet: YouTubeSnippet): string | null {
@@ -85,6 +121,11 @@ function pickThumbnail(snippet: YouTubeSnippet): string | null {
 }
 
 export async function getUploadsPlaylistId(): Promise<string> {
+  const cachedPlaylistId = process.env.YOUTUBE_UPLOADS_PLAYLIST_ID;
+  if (cachedPlaylistId) {
+    return cachedPlaylistId;
+  }
+
   const data = await youtubeFetch<ChannelsResponse>("channels", {
     part: "contentDetails",
     forHandle: "TrashTaste",
@@ -133,11 +174,13 @@ export async function fetchAllPlaylistItems(
 
 export async function fetchVideoDurations(
   videoIds: string[],
+  existingDurations: Map<string, number> = new Map(),
 ): Promise<Map<string, number>> {
-  const durations = new Map<string, number>();
+  const durations = new Map(existingDurations);
+  const idsToFetch = videoIds.filter((id) => !durations.has(id));
 
-  for (let index = 0; index < videoIds.length; index += 50) {
-    const batch = videoIds.slice(index, index + 50);
+  for (let index = 0; index < idsToFetch.length; index += 50) {
+    const batch = idsToFetch.slice(index, index + 50);
     const data = await youtubeFetch<VideosResponse>("videos", {
       part: "contentDetails",
       id: batch.join(","),
@@ -156,7 +199,9 @@ export async function fetchVideoDurations(
   return durations;
 }
 
-export async function fetchTrashTasteEpisodesFromYouTube(): Promise<{
+export async function fetchTrashTasteEpisodesFromYouTube(
+  existingDurations: Map<string, number> = new Map(),
+): Promise<{
   episodes: ParsedYouTubeEpisode[];
   discarded: number;
 }> {
@@ -186,7 +231,10 @@ export async function fetchTrashTasteEpisodesFromYouTube(): Promise<{
     parsed.push(episode);
   }
 
-  const durations = await fetchVideoDurations(parsed.map((episode) => episode.youtube_id));
+  const durations = await fetchVideoDurations(
+    parsed.map((episode) => episode.youtube_id),
+    existingDurations,
+  );
 
   return {
     episodes: parsed.map((episode) => ({

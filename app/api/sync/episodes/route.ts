@@ -1,7 +1,8 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { syncEpisodesFromYouTube } from "@/lib/youtube/sync";
 
-export async function POST(request: Request) {
+async function handleSync(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
@@ -18,9 +19,18 @@ export async function POST(request: Request) {
 
   try {
     const result = await syncEpisodesFromYouTube();
+    revalidateTag("episodes", "max");
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sync failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  return handleSync(request);
+}
+
+export async function POST(request: Request) {
+  return handleSync(request);
 }
