@@ -5,11 +5,16 @@ type EmptyStateProps = {
 
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
-    <div className="rounded-3xl border border-dashed border-[#D9D0C0] bg-white px-6 py-16 text-center shadow-sm">
-      <h2 className="font-display text-2xl font-semibold text-[#1A1A1A]">
+    <div className="relative overflow-hidden rounded-lg border border-border bg-background px-6 py-16 text-center shadow-sm">
+      <div
+        aria-hidden
+        className="absolute top-0 right-0 h-16 w-32 bg-brand-purple"
+        style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0 100%)" }}
+      />
+      <h2 className="relative font-display text-2xl tracking-tight text-foreground uppercase">
         {title}
       </h2>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#666666]">
+      <p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-muted">
         {description}
       </p>
     </div>

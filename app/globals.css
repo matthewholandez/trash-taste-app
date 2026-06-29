@@ -1,29 +1,76 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf7f0;
+  --brand-purple: #5d2689;
+  --brand-purple-dark: #4a1f6e;
+  --brand-purple-light: #7b3faf;
+  --background: #ffffff;
+  --surface: #f5f3f7;
   --foreground: #1a1a1a;
-  --primary: #1b5e3a;
-  --muted: #666666;
-  --border: #e8e2d6;
+  --foreground-on-purple: #ffffff;
+  --muted: #6b6570;
+  --border: #e4dfea;
+  --accent-neon-yellow: #ffd23f;
+  --accent-neon-pink: #ff4d8d;
+  --accent-neon-blue: #4dc4ff;
+  --awards-black: #0d0d0d;
+  --awards-gold: #c9a227;
+  --awards-gold-light: #e8c547;
+  --awards-gold-muted: #8f7420;
 }
 
 @theme inline {
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-purple-dark: var(--brand-purple-dark);
+  --color-brand-purple-light: var(--brand-purple-light);
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
+  --color-foreground-on-purple: var(--foreground-on-purple);
   --color-muted: var(--muted);
   --color-border: var(--border);
-  --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-outfit);
+  --color-accent-neon-yellow: var(--accent-neon-yellow);
+  --color-accent-neon-pink: var(--accent-neon-pink);
+  --color-accent-neon-blue: var(--accent-neon-blue);
+  --color-awards-black: var(--awards-black);
+  --color-awards-gold: var(--awards-gold);
+  --color-awards-gold-light: var(--awards-gold-light);
+  --color-awards-gold-muted: var(--awards-gold-muted);
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-display: var(--font-archivo-black);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-dm-sans), sans-serif;
+  font-family: var(--font-ibm-plex-sans), sans-serif;
 }
 
 .font-display {
-  font-family: var(--font-outfit), sans-serif;
+  font-family: var(--font-archivo-black), sans-serif;
+}
+
+.slant-accent {
+  transform: skewX(-12deg);
+}
+
+.slant-accent > * {
+  transform: skewX(12deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes slant-enter {
+    from {
+      opacity: 0;
+      transform: skewX(-12deg) translateX(-1rem);
+    }
+    to {
+      opacity: 1;
+      transform: skewX(-12deg) translateX(0);
+    }
+  }
+
+  .slant-accent-animate {
+    animation: slant-enter 0.6s ease-out both;
+  }
 }

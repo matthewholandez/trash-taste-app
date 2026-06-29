@@ -74,12 +74,12 @@ async function HomeContent() {
 function HomeLoading() {
   return (
     <div className="flex flex-col gap-10">
-      <div className="aspect-video animate-pulse rounded-2xl bg-neutral-200/80" />
+      <div className="aspect-video animate-pulse rounded-lg bg-brand-purple/10" />
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="aspect-video animate-pulse rounded-xl bg-neutral-200/80"
+            className="aspect-video animate-pulse rounded-lg bg-brand-purple/10"
           />
         ))}
       </div>
@@ -91,7 +91,7 @@ function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-6 py-10">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 bg-background px-6 py-10">
         {children}
       </main>
     </>
