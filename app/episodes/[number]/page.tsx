@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteShell } from "@/components/site-shell";
 import { EmptyState } from "@/components/empty-state";
 import { EpisodeDetail } from "@/components/episode-detail";
 import { getEpisode, getEpisodeTitle } from "@/lib/episodes";
@@ -34,14 +34,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default function EpisodePage({ params }: PageProps) {
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col bg-background px-6 py-10">
-        <Suspense fallback={<EpisodeLoading />}>
-          <EpisodeContent params={params} />
-        </Suspense>
-      </main>
-    </>
+    <SiteShell mainClassName="mx-auto flex w-full max-w-6xl flex-1 flex-col bg-background px-6 py-10">
+      <Suspense fallback={<EpisodeLoading />}>
+        <EpisodeContent params={params} />
+      </Suspense>
+    </SiteShell>
   );
 }
 
