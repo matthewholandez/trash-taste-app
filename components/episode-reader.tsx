@@ -70,7 +70,7 @@ function findActiveChapter(
 
 export function EpisodeReader({ episode }: EpisodeReaderProps) {
   const [query, setQuery] = useState("");
-  const [activeSeconds, setActiveSeconds] = useState<number | null>(null);
+  const [activeLineIndex, setActiveLineIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
@@ -79,34 +79,45 @@ export function EpisodeReader({ episode }: EpisodeReaderProps) {
   const hasTranscript =
     episode.transcription_status === "complete" && transcript.length > 0;
 
-  const activeChapter = useMemo(
-    () =>
-      activeSeconds != null ? findActiveChapter(chapters, activeSeconds) : -1,
-    [chapters, activeSeconds],
-  );
+  const activeChapter = useMemo(() => {
+    if (activeLineIndex == null) {
+      return -1;
+    }
+
+    const seconds = transcript[activeLineIndex]?.seconds;
+    if (seconds == null) {
+      return -1;
+    }
+
+    return findActiveChapter(chapters, seconds);
+  }, [chapters, transcript, activeLineIndex]);
 
   const filteredTranscript = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return transcript;
-    }
 
-    return transcript.filter((line) =>
-      line.text.toLowerCase().includes(normalizedQuery),
-    );
+    return transcript
+      .map((line, index) => ({ line, index }))
+      .filter(({ line }) => {
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        return line.text.toLowerCase().includes(normalizedQuery);
+      });
   }, [transcript, query]);
 
   const seekTo = useCallback(
     (seconds: number) => {
-      setActiveSeconds(seconds);
-
-      const target = transcript.find((line) => line.seconds >= seconds);
-      if (!target) {
+      const index = transcript.findIndex((line) => line.seconds >= seconds);
+      if (index === -1) {
         return;
       }
 
-      const element = lineRefs.current.get(target.seconds);
-      element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setActiveLineIndex(index);
+      lineRefs.current.get(index)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     },
     [transcript],
   );
@@ -224,21 +235,21 @@ export function EpisodeReader({ episode }: EpisodeReaderProps) {
               </p>
             ) : (
               <ul className="space-y-1">
-                {filteredTranscript.map((line) => {
-                  const isActive = line.seconds === activeSeconds;
+                {filteredTranscript.map(({ line, index }) => {
+                  const isActive = index === activeLineIndex;
 
                   return (
-                    <li key={`${line.seconds}-${line.text.slice(0, 24)}`}>
+                    <li key={index}>
                       <button
                         type="button"
                         ref={(element) => {
                           if (element) {
-                            lineRefs.current.set(line.seconds, element);
+                            lineRefs.current.set(index, element);
                           } else {
-                            lineRefs.current.delete(line.seconds);
+                            lineRefs.current.delete(index);
                           }
                         }}
-                        onClick={() => setActiveSeconds(line.seconds)}
+                        onClick={() => setActiveLineIndex(index)}
                         className={[
                           "flex w-full gap-3 rounded-md px-2 py-2 text-left transition",
                           "hover:bg-surface focus-visible:ring-2 focus-visible:ring-brand-purple/30 focus-visible:outline-none",

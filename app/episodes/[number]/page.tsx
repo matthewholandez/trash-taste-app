@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState } from "@/components/empty-state";
 import { EpisodeDetail } from "@/components/episode-detail";
-import { getEpisode } from "@/lib/episodes";
+import { getEpisode, getEpisodeTitle } from "@/lib/episodes";
 
 type PageProps = {
   params: Promise<{ number: string }>;
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   try {
-    const episode = await getEpisode(episodeNumber);
+    const episode = await getEpisodeTitle(episodeNumber);
     if (!episode) {
       return { title: "Episode not found" };
     }

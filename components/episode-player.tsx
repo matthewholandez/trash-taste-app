@@ -43,6 +43,7 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
         <EpisodeThumbnail
           src={episode.thumbnail_url}
           alt=""
+          priority
           sizes="(max-width: 1024px) 100vw, 896px"
           className="absolute inset-0 h-full w-full object-cover"
         />
