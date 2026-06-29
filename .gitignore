@@ -15,7 +15,7 @@ package-lock.json
 /coverage
 
 # transcriptions
-/transcriptions/
+transcripts/
 
 # next.js
 /.next/
