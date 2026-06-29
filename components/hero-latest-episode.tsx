@@ -1,8 +1,9 @@
-import Image from "next/image";
 import { isAwardsEpisode } from "@/lib/awards";
 import { formatDate, formatDuration } from "@/lib/format";
 import type { Episode } from "@/lib/types";
+import { EpisodeThumbnail } from "@/components/episode-thumbnail";
 import { YouTubeEmbed } from "@/components/youtube-embed";
+import { THUMBNAIL_ASPECT_CLASS } from "@/lib/thumbnail";
 
 type HeroLatestEpisodeProps = {
   episode: Episode;
@@ -64,16 +65,14 @@ export function HeroLatestEpisode({ episode }: HeroLatestEpisodeProps) {
           {episode.thumbnail_url ? (
             <div
               className={[
-                "overflow-hidden rounded-lg border lg:hidden",
+                "relative overflow-hidden rounded-lg border lg:hidden",
+                THUMBNAIL_ASPECT_CLASS,
                 isAwards ? "border-awards-gold/30" : "border-border",
               ].join(" ")}
             >
-              <Image
+              <EpisodeThumbnail
                 src={episode.thumbnail_url}
                 alt={episode.title}
-                width={1280}
-                height={720}
-                className="h-auto w-full"
                 priority
               />
             </div>

@@ -1,8 +1,9 @@
-import Image from "next/image";
 import { isAwardsEpisode } from "@/lib/awards";
 import { formatDate, formatDuration } from "@/lib/format";
 import { getEpisodePalette } from "@/lib/palettes";
 import type { Episode } from "@/lib/types";
+import { EpisodeThumbnail } from "@/components/episode-thumbnail";
+import { THUMBNAIL_ASPECT_CLASS } from "@/lib/thumbnail";
 
 type EpisodeCardProps = {
   episode: Episode;
@@ -33,17 +34,17 @@ export function EpisodeCard({ episode, index }: EpisodeCardProps) {
       >
         <div
           className={[
-            "relative aspect-video overflow-hidden",
+            "relative overflow-hidden",
+            THUMBNAIL_ASPECT_CLASS,
             isAwards ? "border-b border-awards-gold/30 bg-black" : "bg-surface",
           ].join(" ")}
         >
           {episode.thumbnail_url ? (
-            <Image
+            <EpisodeThumbnail
               src={episode.thumbnail_url}
               alt={episode.title}
-              fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition duration-300 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="transition duration-300 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
             <div
