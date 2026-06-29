@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { isAwardsEpisode } from "@/lib/awards";
 import { formatDate, formatDuration } from "@/lib/format";
 import { getEpisodePalette } from "@/lib/palettes";
@@ -26,10 +27,8 @@ export function EpisodeCard({ episode, index }: EpisodeCardProps) {
           : "bg-background hover:shadow-brand-purple/20 focus-within:ring-brand-purple/30",
       ].join(" ")}
     >
-      <a
-        href={episode.youtube_url}
-        target="_blank"
-        rel="noreferrer"
+      <Link
+        href={`/episodes/${episode.episode_number}`}
         className="flex h-full flex-col"
       >
         <div
@@ -112,7 +111,7 @@ export function EpisodeCard({ episode, index }: EpisodeCardProps) {
             Ep {episode.episode_number}
           </span>
         </div>
-      </a>
+      </Link>
     </article>
   );
 }
