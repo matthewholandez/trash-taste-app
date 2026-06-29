@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trash Taste Archive
 
-## Getting Started
+A fan archive for the [Trash Taste](https://www.youtube.com/@TrashTaste) podcast. Episodes are synced from YouTube into Supabase and displayed in a warm, browsable grid.
 
-First, run the development server:
+## Setup
+
+1. Copy `.env.example` to `.env.local` and fill in the values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a Supabase project, create publishable/secret API keys in **Settings → API Keys**, and run the migrations in [`supabase/migrations/`](supabase/migrations/).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Apply the RLS migration so the publishable key can read episodes publicly, then run [`003_grants.sql`](supabase/migrations/003_grants.sql) if you already applied the earlier migrations before grants were added.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Install dependencies and start the dev server:
 
-## Learn More
+```bash
+pnpm install
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Seed episodes from YouTube:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+curl -X POST http://localhost:3000/api/sync/episodes \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment variables
 
-## Deploy on Vercel
+| Variable | Purpose |
+|---|---|
+| `YOUTUBE_API_KEY` | YouTube Data API v3 key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (`sb_publishable_...`) for page reads |
+| `SUPABASE_SECRET_KEY` | Supabase secret key (`sb_secret_...`) for sync writes |
+| `CRON_SECRET` | Protects `/api/sync/episodes` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Supabase replaced legacy `anon` and `service_role` JWT keys with [publishable and secret keys](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys). Create them under **Settings → API Keys → Publishable and secret API keys** in the Supabase dashboard.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Sync schedule
+
+Vercel Cron runs `/api/sync/episodes` every Friday at 22:00 UTC via [`vercel.json`](vercel.json).
+
+## Episode parsing rules
+
+- Fetch all uploads from `@TrashTaste`
+- Keep videos whose title contains `Trash Taste #`
+- Episode number comes from `Trash Taste #123`
+- Display title is the text before `| Trash Taste`
+
+## Troubleshooting
+
+**`permission denied for table episodes`**
+
+This is a Postgres `GRANT` issue, not an RLS policy issue. Supabase no longer auto-grants API roles access to tables created via SQL. Run [`supabase/migrations/003_grants.sql`](supabase/migrations/003_grants.sql) in the Supabase SQL editor.
