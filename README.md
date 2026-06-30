@@ -1,6 +1,23 @@
-# Trash Taste Archive
+<div align="center">
+<h1>Trash Taste App</h1>
+<p>Community-made web app for the <a href="https://www.youtube.com/@TrashTaste">Trash Taste podcast.</a></p>
+</div>
 
-A fan archive for the [Trash Taste](https://www.youtube.com/@TrashTaste) podcast. Episodes are synced from YouTube into Supabase and displayed in a warm, browsable grid.
+⚠️ **Almost everything is currently a work in progress.**
+
+## Features
+
+- **See every episode (and summaries of each) at a glance.**
+- **Want to read along?** Get full episode transcripts.
+- **Forget which episode the boys talked about [X]?** Search in natural language to find what you're looking for. [WIP]
+- **Nerd?** Stats. Lots of them. [WIP]
+
+## How it works
+
+- The **YouTube API** is where we get video metadata (link, title, description, views, likes, comments, thumbnail, etc)
+  - A sync job runs every Friday at 22:00 UTC via Vercel Cron (see [`vercel.json`](vercel.json))
+- Videos become entries in a Postgres database (**Supabase**)
+- Each episode is transcribed using **OpenAI Whisper** and transcripts are appended to the video entries as they become available
 
 ## Setup
 
@@ -12,16 +29,15 @@ cp .env.example .env.local
 
 2. Create a Supabase project, create publishable/secret API keys in **Settings → API Keys**, and run the migrations in [`supabase/migrations/`](supabase/migrations/).
 
-3. Apply the RLS migration so the publishable key can read episodes publicly, then run [`003_grants.sql`](supabase/migrations/003_grants.sql) if you already applied the earlier migrations before grants were added.
-
-4. Install dependencies and start the dev server:
+3. Install dependencies and start the dev server:
 
 ```bash
 pnpm install
+
 pnpm dev
 ```
 
-5. Seed episodes from YouTube:
+4. Seed episodes from YouTube:
 
 ```bash
 curl -X POST http://localhost:3000/api/sync/episodes \
@@ -40,22 +56,3 @@ The same endpoint accepts GET (used by Vercel Cron) and POST (manual sync).
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (`sb_publishable_...`) for page reads |
 | `SUPABASE_SECRET_KEY` | Supabase secret key (`sb_secret_...`) for sync writes |
 | `CRON_SECRET` | Protects `/api/sync/episodes` |
-
-Supabase replaced legacy `anon` and `service_role` JWT keys with [publishable and secret keys](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys). Create them under **Settings → API Keys → Publishable and secret API keys** in the Supabase dashboard.
-
-## Sync schedule
-
-Vercel Cron runs `/api/sync/episodes` every Friday at 22:00 UTC via [`vercel.json`](vercel.json).
-
-## Episode parsing rules
-
-- Fetch all uploads from `@TrashTaste`
-- Keep videos whose title contains `Trash Taste #`
-- Episode number comes from `Trash Taste #123`
-- Display title is the text before `| Trash Taste`
-
-## Troubleshooting
-
-**`permission denied for table episodes`**
-
-This is a Postgres `GRANT` issue, not an RLS policy issue. Supabase no longer auto-grants API roles access to tables created via SQL. Run [`supabase/migrations/003_grants.sql`](supabase/migrations/003_grants.sql) in the Supabase SQL editor.
