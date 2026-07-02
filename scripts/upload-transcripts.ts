@@ -72,13 +72,22 @@ async function main() {
     process.exit(1);
   }
 
+  const numberedFiles = files.filter((name) => {
+    const stem = name.replace(/\.srt$/, "");
+    return /^\d+$/.test(stem);
+  });
+
+  // Files are zero-padded (e.g. 001.srt), so match requested episode numbers
+  // against the parsed stem rather than assuming an exact filename.
   const targets =
     episodeNumbers.length > 0
-      ? episodeNumbers.map((n) => `${n}.srt`)
-      : files.filter((name) => {
-          const stem = name.replace(/\.srt$/, "");
-          return /^\d+$/.test(stem);
-        });
+      ? episodeNumbers.map(
+          (n) =>
+            numberedFiles.find(
+              (name) => Number(name.replace(/\.srt$/, "")) === n,
+            ) ?? `${n}.srt`,
+        )
+      : numberedFiles;
 
   let uploaded = 0;
   let skipped = 0;
@@ -93,7 +102,15 @@ async function main() {
       continue;
     }
 
-    const raw = await readFile(join(dir, filename), "utf8");
+    let raw: string;
+    try {
+      raw = await readFile(join(dir, filename), "utf8");
+    } catch {
+      console.warn(`Ep ${episodeNumber}: no ${filename} in ${dir} — skipped`);
+      skipped += 1;
+      continue;
+    }
+
     const transcript = parseSrt(raw);
 
     const { data: existing, error: lookupError } = await supabase

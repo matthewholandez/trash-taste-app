@@ -52,6 +52,9 @@ export function formatDate(isoDate: string | null): string | null {
     month: "short",
     day: "numeric",
     year: "numeric",
+    // Pin to UTC so server render and client hydration agree regardless of
+    // the viewer's (or server's) timezone.
+    timeZone: "UTC",
   }).format(new Date(isoDate));
 }
 

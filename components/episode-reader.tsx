@@ -125,8 +125,9 @@ export function EpisodeReader({ episode }: EpisodeReaderProps) {
   return (
     <div className="space-y-4">
       <p className="rounded-md border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-muted">
-        Summary, transcript and tags are auto-generated. AI output can be
-        inaccurate and should not be taken as fact.
+        Summary, chapters and tags come from the YouTube description.
+        Transcripts are auto-generated and can be inaccurate — don&apos;t take
+        them as fact.
       </p>
 
       <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-7">

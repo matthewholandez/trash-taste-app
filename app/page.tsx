@@ -4,10 +4,10 @@ import { SiteShell } from "@/components/site-shell";
 import { EpisodeArchive } from "@/components/episode-archive";
 import { HeroLatestEpisode } from "@/components/hero-latest-episode";
 import { getEpisodes, getLatestEpisode } from "@/lib/episodes";
-import type { Episode } from "@/lib/types";
+import type { Episode, EpisodeListItem } from "@/lib/types";
 
 type PageContent =
-  | { kind: "ready"; latestEpisode: Episode; episodes: Episode[] }
+  | { kind: "ready"; latestEpisode: Episode; episodes: EpisodeListItem[] }
   | { kind: "empty" }
   | { kind: "error"; message: string };
 

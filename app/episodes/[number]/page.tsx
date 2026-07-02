@@ -4,10 +4,17 @@ import { Suspense } from "react";
 import { SiteShell } from "@/components/site-shell";
 import { EmptyState } from "@/components/empty-state";
 import { EpisodeDetail } from "@/components/episode-detail";
-import { getEpisode, getEpisodeTitle } from "@/lib/episodes";
+import { getEpisode } from "@/lib/episodes";
 
 type PageProps = {
   params: Promise<{ number: string }>;
+};
+
+// Unknown episodes stream a 200 shell before notFound() runs (PPR), so tell
+// crawlers explicitly not to index them.
+const NOT_FOUND_METADATA: Metadata = {
+  title: "Episode not found",
+  robots: { index: false },
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -15,20 +22,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const episodeNumber = Number(number);
 
   if (!Number.isInteger(episodeNumber) || episodeNumber <= 0) {
-    return { title: "Episode not found" };
+    return NOT_FOUND_METADATA;
   }
 
   try {
-    const episode = await getEpisodeTitle(episodeNumber);
+    const episode = await getEpisode(episodeNumber);
     if (!episode) {
-      return { title: "Episode not found" };
+      return NOT_FOUND_METADATA;
     }
 
+    const title = `Ep ${episode.episode_number} — ${episode.title}`;
+    const description = `Trash Taste #${episode.episode_number}: ${episode.title}. Watch the episode, browse chapters, and read the transcript.`;
+
     return {
-      title: `Ep ${episode.episode_number} — ${episode.title}`,
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        images: episode.thumbnail_url ? [episode.thumbnail_url] : undefined,
+      },
     };
   } catch {
-    return { title: "Episode not found" };
+    return NOT_FOUND_METADATA;
   }
 }
 

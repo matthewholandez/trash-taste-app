@@ -2,12 +2,12 @@ import Link from "next/link";
 import { isAwardsEpisode } from "@/lib/awards";
 import { formatDate, formatDuration } from "@/lib/format";
 import { getEpisodePalette } from "@/lib/palettes";
-import type { Episode } from "@/lib/types";
+import type { EpisodeListItem } from "@/lib/types";
 import { EpisodeThumbnail } from "@/components/episode-thumbnail";
 import { THUMBNAIL_ASPECT_CLASS } from "@/lib/thumbnail";
 
 type EpisodeCardProps = {
-  episode: Episode;
+  episode: EpisodeListItem;
   index: number;
 };
 

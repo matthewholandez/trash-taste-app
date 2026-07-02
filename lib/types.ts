@@ -32,6 +32,17 @@ export type Episode = {
   updated_at: string;
 };
 
+/** Slim shape for archive listings — keeps the home page payload small. */
+export type EpisodeListItem = Pick<
+  Episode,
+  | "id"
+  | "episode_number"
+  | "title"
+  | "thumbnail_url"
+  | "published_at"
+  | "duration_seconds"
+>;
+
 export type ParsedYouTubeEpisodeBase = {
   episode_number: number;
   title: string;

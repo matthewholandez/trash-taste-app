@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { EpisodeCard } from "@/components/episode-card";
-import type { Episode } from "@/lib/types";
+import type { EpisodeListItem } from "@/lib/types";
 
 type EpisodeArchiveProps = {
-  episodes: Episode[];
+  episodes: EpisodeListItem[];
 };
 
 export function EpisodeArchive({ episodes }: EpisodeArchiveProps) {
@@ -30,7 +30,11 @@ export function EpisodeArchive({ episodes }: EpisodeArchiveProps) {
           <h2 className="font-display text-2xl tracking-tight text-foreground uppercase sm:text-3xl">
             All episodes
           </h2>
-          <p className="mt-1 text-sm text-muted">{episodes.length} episodes</p>
+          <p className="mt-1 text-sm text-muted">
+            {filteredEpisodes.length === episodes.length
+              ? `${episodes.length} episodes`
+              : `${filteredEpisodes.length} of ${episodes.length} episodes`}
+          </p>
         </div>
 
         <label className="block w-full sm:max-w-sm">

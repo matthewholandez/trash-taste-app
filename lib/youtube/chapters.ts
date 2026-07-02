@@ -42,6 +42,11 @@ export function parseChaptersFromDescription(description: string): Chapter[] {
   return chapters;
 }
 
+// Trash Taste descriptions open with sponsor plugs and link blocks. Anything
+// with a URL or promo language is not a usable episode summary.
+const PROMO_PATTERN =
+  /https?:\/\/|\bwww\.|\buse code\b|\bpromo code\b|\bcode\s+[A-Z0-9]{3,}\b|%\s*off\b|\bdiscount\b|\bfree shipping\b|\bsign up\b|\btrial\b|\bsponsor/i;
+
 export function summaryFromDescription(description: string): string | null {
   const lines = description.split(/\r?\n/);
   const paragraphs: string[] = [];
@@ -69,6 +74,8 @@ export function summaryFromDescription(description: string): string | null {
     paragraphs.push(current.join(" "));
   }
 
-  const first = paragraphs.find((paragraph) => paragraph.length > 0);
+  const first = paragraphs.find(
+    (paragraph) => paragraph.length > 0 && !PROMO_PATTERN.test(paragraph),
+  );
   return first ?? null;
 }
